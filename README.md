@@ -18,7 +18,7 @@ Portfolio for Japanese game programmer job hunting
 ### 1. VR寿司ゲーム
 VR空間で寿司を投げ、客の注文に応えるゲームです。  
 - 使用技術：Unity / C# / XR Interaction Toolkit
-- 担当：投擲システム、注文UI、座席管理
+- 担当：寿司の生成・投げるシステム、注文UI、座席管理
 - 詳細：[こちら](./vr-sushi-game/README.md)
 
 ### 2. 作品名
