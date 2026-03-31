@@ -38,13 +38,16 @@ VR空間で、来店した客の注文に応じて寿司を作り、投げて提
 さらに、NavMeshAgentを用いて席まで移動させ、到着後は位置・向きを座席に合わせた上で着席アニメーションを再生し、注文処理を開始する流れを構築しました。
 
 ## 主要スクリプト
-- `CustomerSpawner.cs`  
+- [CustomerSpawner.cs](./scripts/CustomerSpawner.cs)  
   客のスポーン、空席判定、座席への誘導を担当
-- `CustomerSitting.cs`  
+
+- [CustomerSitting.cs](./scripts/CustomerSitting.cs)  
   客の移動、着席処理、注文開始の状態遷移を担当
-- `CustomerOrderWithTimer.cs`  
+
+- [CustomerOrderWithTimer.cs](./scripts/CustomerOrderWithTimer.cs)  
   注文生成、タイマーUI、正誤判定、スコア反映を担当
-- `FishSource.cs`  
+
+- [FishSource.cs](./scripts/FishSource.cs)  
   VR空間でのネタ生成と手へのアタッチ処理を担当
 
 ## スクリーンショット
