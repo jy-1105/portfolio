@@ -8,17 +8,17 @@ public class CustomerSitting : MonoBehaviour
     [HideInInspector]
     public SeatPoint currentSeat;   // 現在座っている席
 
-    private SeatPoint targetSeat;   // 目標となる席（移動先）
+    private SeatPoint targetSeat;   // 移動先となる目標の席
     private NavMeshAgent agent;
     private Animator anim;
 
-    private bool isGoingToSeat = false; // 席に向かって移動中かどうか
-    private bool isSitting = false;     // 既に座ったかどうか
+    private bool isGoingToSeat = false; // 席へ移動中かどうか
+    private bool isSitting = false;     // すでに座ったかどうか
 
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
-        anim = GetComponentInChildren<Animator>();   // 🔥 이거여야 함 (루트에 없고 자식에 있을 때)
+        anim = GetComponentInChildren<Animator>();   // Animator がルートではなく子オブジェクトにある場合に取得
 
         if (anim == null)
         {
@@ -32,19 +32,19 @@ public class CustomerSitting : MonoBehaviour
 
         if (agent != null)
         {
-            agent.updateRotation = true;
+            agent.updateRotation = true; // 移動方向に合わせて自動回転させる
         }
     }
 
     /// <summary>
-    /// 指定された Seat に向かって歩き始める処理
+    /// 指定された席へ向かって移動を開始する
     /// </summary>
     public void GoToSeat(SeatPoint seat)
     {
         if (seat == null) return;
 
         targetSeat = seat;
-        targetSeat.isOccupied = true;  // 席を「使用中」状態にする
+        targetSeat.isOccupied = true;  // この席を使用中にする
 
         isGoingToSeat = true;
         isSitting = false;
@@ -53,22 +53,22 @@ public class CustomerSitting : MonoBehaviour
         {
             agent.enabled = true;
             agent.isStopped = false;
-            agent.SetDestination(targetSeat.transform.position); // Seat の位置へ移動開始
+            agent.SetDestination(targetSeat.transform.position); // 目標の席へ移動開始
         }
 
-        // 歩きアニメーション開始
+        // 歩行アニメーションを再生
         if (anim != null)
         {
-            anim.SetBool("IsWalking", true);  // ← Animator パラメーター名と完全一致が必要
+            anim.SetBool("IsWalking", true);  // Animator のパラメーター名と一致している必要がある
         }
     }
 
     void Update()
     {
-        // 席に向かって移動中 & まだ座っていない状態
+        // 席へ移動中で、まだ座っていない場合のみ到着判定を行う
         if (isGoingToSeat && !isSitting && agent != null && agent.enabled)
         {
-            // NavMeshAgent が目標地点にほぼ到達したかどうか
+            // NavMeshAgent が目的地付近まで到達したか確認
             if (!agent.pathPending &&
                 agent.remainingDistance <= agent.stoppingDistance + 0.05f)
             {
@@ -78,34 +78,34 @@ public class CustomerSitting : MonoBehaviour
     }
 
     /// <summary>
-    /// 席に到着した時に実行される処理（座る動作）
+    /// 席に到着したときの処理
     /// </summary>
     private void ArriveAndSit()
     {
         isGoingToSeat = false;
         isSitting = true;
 
-        currentSeat = targetSeat;   // 最終的に座っている席として記録
+        currentSeat = targetSeat;   // 現在座っている席として保存
 
         if (agent != null)
         {
             agent.isStopped = true;
-            agent.enabled = false;  // もう移動しないため Agent を無効化
+            agent.enabled = false;  // 到着後は移動しないため無効化
         }
 
-        // 座る位置・向きを Seat と完全一致させる
+        // キャラクターの位置と向きを席にぴったり合わせる
         transform.position = currentSeat.transform.position;
-        transform.rotation = currentSeat.transform.rotation;  // 必要に応じて 180 度回転版に変更可
+        transform.rotation = currentSeat.transform.rotation;  // 必要なら 180 度回転させる形に変更可能
 
         if (anim != null)
         {
-            anim.SetBool("IsWalking", false);  // 歩きアニメーション停止
-            anim.SetTrigger("Sit");            // 座るアニメーション再生
-            anim.SetBool("IsWalking", false);  // 歩きアニメーション停止
-            anim.SetTrigger("Sit");            // 座るアニメーション再生
+            anim.SetBool("IsWalking", false);  // 歩行アニメーションを停止
+            anim.SetTrigger("Sit");            // 座るアニメーションを再生
+            anim.SetBool("IsWalking", false);  // 歩行アニメーションを停止
+            anim.SetTrigger("Sit");            // 座るアニメーションを再生
         }
 
-        // 席についたので注文を開始！
+        // 着席後に注文処理を開始
         CustomerOrderWithTimer orderScript = GetComponent<CustomerOrderWithTimer>();
         if (orderScript != null)
         {
@@ -114,7 +114,8 @@ public class CustomerSitting : MonoBehaviour
     }
 
     /// <summary>
-    /// 客が退店する時の処理（席を空けて、オブジェクトを削除）
+    /// 客が退店するときの処理
+    /// 席を空席に戻し、自身を削除する
     /// </summary>
     public void Leave()
     {
@@ -124,6 +125,6 @@ public class CustomerSitting : MonoBehaviour
             currentSeat = null;
         }
 
-        Destroy(gameObject);  // 客オブジェクトの削除
+        Destroy(gameObject);  // 客オブジェクトを削除
     }
 }

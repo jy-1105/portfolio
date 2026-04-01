@@ -1,39 +1,47 @@
-# portfolio
-Portfolio for Japanese game programmer job hunting
+# Sim Juyong Portfolio
 
 ## プロフィール
 - 名前：Sim Juyong
 - 所属：東海大学
 - 志望職種：ゲームプログラマー
-- 使用言語：C#, C++ 
-- 使用ツール：Unity, Git, GitHub, Arduino  
-- 開発経験：UnityによるVRゲーム開発、Arduinoを活用したインタラクティブゲーム制作
+- 使用言語：C#, C++
+- 使用ツール：Unity, Git, GitHub, Arduino
 
 ## 自己紹介
-大学ではゲーム制作を中心に学び、主にUnityを用いた開発に取り組みました。
-チーム開発では、進捗共有の仕組みづくりやゲームシステム実装を担当し、
-協力しながら完成度を高めることを意識してきました。
+大学では主にUnityを用いたゲーム制作に取り組み、チーム開発の中でゲームシステム実装やUI実装を担当してきました。  
+また、Arduinoとセンサーを活用したインタラクション作品の制作も経験しており、ソフトウェアだけでなく、実際の動作と連動した体験設計にも関心があります。  
+ポートフォリオでは、VRゲーム、物理挙動を活用したアクションゲーム、Arduinoを用いた体験型防災システムを掲載しています。
+
+## 使用技術
+- Unity
+- C#
+- C++
+- XR Interaction Toolkit
+- NavMesh
+- Rigidbody
+- Arduino
+- シリアル通信
+- Git / GitHub
 
 ## 制作物一覧
 
 ### 1. VR_SushiMaster
-VR空間で寿司を投げ、客の注文に応えるゲームです。  
-- 使用技術：Unity / C# / XR Interaction Toolkit
-- 担当：寿司の生成・投げるシステム、注文UI、座席管理
+VR空間で寿司を作り、客の注文に応じて投げて提供するゲームです。  
+- 使用技術：Unity / C# / XR Interaction Toolkit / NavMesh
+- 担当：寿司の生成・把持・投擲処理、注文UI、客のスポーン・座席管理・着席処理、スコア判定
 - 詳細：[こちら](./vr-sushi-game/README.md)
 
 ### 2. FLY_PANCAKE
-作品の簡単な説明  
-- 使用技術：
-- 担当：
+マウス操作でパワーゲージを調整し、パンケーキをフライパンからフライパンへ飛ばして皿まで運ぶ3Dアクションゲームです。  
+- 使用技術：Unity / C# / Rigidbody / UI（Slider）
+- 担当：パンケーキの発射処理、パワーゲージ、衝突判定、ゲームオーバー処理、効果音実装
 - 詳細：[こちら](./flypancake-game/README.md)
 
-### 3. 作品名
-作品の簡単な説明  
-- 使用技術：
-- 担当：
-- 詳細：[こちら](./project-3/README.md)
+### 3. 地震避難
+Arduinoと距離センサーを用いて、実際に机の下へ避難する動作を体験できる教育用の体験型防災システムです。  
+- 使用技術：Arduino / Unity / C# / 距離センサー / シリアル通信
+- 担当：センサー入力処理、ArduinoとUnityの連動、ゲーム開始・結果画面、段ボール机の制作
+- 詳細：[こちら](./earthquake-evacuation-system/README.md)
 
 ## リンク
-- GitHub: https://github.com/あなたのID
-- 動画一覧: ここにYouTubeリンク
+- GitHub: https://github.com/jy-1105
