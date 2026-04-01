@@ -1,9 +1,9 @@
 # Sim Juyong Portfolio
 
 ## プロフィール
-- 名前：Sim Juyong
+- 名前：沈周用　Sim Juyong
 - 所属：東海大学
-- 志望職種：ゲームプログラマー
+- 志望職種：プログラマー
 - 使用言語：C#, C++
 - 使用ツール：Unity, Git, GitHub, Arduino
 
@@ -17,10 +17,7 @@
 - C#
 - C++
 - XR Interaction Toolkit
-- NavMesh
-- Rigidbody
 - Arduino
-- シリアル通信
 - Git / GitHub
 
 ## 制作物一覧
