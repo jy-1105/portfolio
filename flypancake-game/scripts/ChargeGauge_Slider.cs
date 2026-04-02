@@ -2,6 +2,10 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// パワーゲージの増減処理とUI表示を管理するクラス。
+/// チャージ量は一定時間ごとに増減を繰り返し、発射処理に利用される。
+/// </summary>
 public class ChargeGauge_Slider : MonoBehaviour
 {
     public Slider chargeSlider;
@@ -14,10 +18,10 @@ public class ChargeGauge_Slider : MonoBehaviour
     private bool canCharge = true;
     private float chargeCooldown = 1f;
 
-    public AudioSource audioSource; // 効果音を再生するためのAudioSource
-    public AudioClip chargeSound; // チャージ中に再生する効果音
+    public AudioSource audioSource;
+    public AudioClip chargeSound;
 
-    public float CurrentCharge => currentChargeTime / maxChargeTime; // 現在のチャージ量を0～1に正規化して返す
+    public float CurrentCharge => currentChargeTime / maxChargeTime;
 
     void Update()
     {
@@ -25,17 +29,17 @@ public class ChargeGauge_Slider : MonoBehaviour
         {
             isCharging = true;
 
-            // チャージ開始時に効果音を再生
             if (audioSource != null && chargeSound != null)
             {
                 audioSource.clip = chargeSound;
-                audioSource.loop = true; // チャージ中は効果音をループ再生する
+                audioSource.loop = true;
                 audioSource.Play();
             }
         }
 
         if (Input.GetMouseButton(0) && isCharging)
         {
+            // チャージ量は最大値到達後に減少へ転じ、タイミング調整を必要とする設計にしている
             if (isIncreasing)
             {
                 currentChargeTime += Time.deltaTime;
@@ -63,11 +67,9 @@ public class ChargeGauge_Slider : MonoBehaviour
         {
             isCharging = false;
 
-            // 発射後にゲージを初期化
             if (chargeSlider != null)
                 chargeSlider.value = 0f;
 
-            // 効果音を停止
             if (audioSource != null)
             {
                 audioSource.Stop();
@@ -84,7 +86,9 @@ public class ChargeGauge_Slider : MonoBehaviour
         canCharge = true;
     }
 
-    // ゲージを初期化するメソッド
+    /// <summary>
+    /// 発射後にチャージ量とUI表示を初期状態へ戻す。
+    /// </summary>
     public void ResetCharge()
     {
         currentChargeTime = 0f;

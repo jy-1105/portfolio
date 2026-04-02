@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+/// <summary>
+/// 客を一定間隔で生成し、空席を判定して適切な席へ誘導するクラス。
+/// スポーン位置の補正や座席管理も担当する。
+/// </summary>
 public class CustomerSpawner : MonoBehaviour
 {
     [Header("客のプレハブ（複数）")]
-    [Tooltip("ここに複数の客Prefabを入れると、上から順番にスポーンします")]
+    [Tooltip("複数の客Prefabを設定すると、上から順番にスポーンする")]
     public GameObject[] customerPrefabs;
 
     [Header("生成時の効果音")]
@@ -26,7 +30,6 @@ public class CustomerSpawner : MonoBehaviour
     public float difficultyIncreaseInterval = 20f;
     public float difficultyDecreaseAmount = 1f;
 
-    // ✅ 次にスポーンするPrefabのインデックス（順番管理）
     private int nextPrefabIndex = 0;
 
     private void Start()
@@ -36,7 +39,6 @@ public class CustomerSpawner : MonoBehaviour
 
     private void Update()
     {
-        // 難易度調整（今回は停止）
         /*
         timer += Time.deltaTime;
         if (timer >= difficultyIncreaseInterval)
@@ -53,7 +55,7 @@ public class CustomerSpawner : MonoBehaviour
     }
 
     /// <summary>
-    /// 一定間隔で客を生成するループ処理
+    /// 一定間隔で客の生成を試みるループ処理。
     /// </summary>
     private IEnumerator SpawnLoop()
     {
@@ -66,11 +68,10 @@ public class CustomerSpawner : MonoBehaviour
     }
 
     /// <summary>
-    /// 空いている席があれば客を1人生成して、その席に向かわせる
+    /// 空席がある場合に客を生成し、対象の席へ移動させる。
     /// </summary>
     private void TrySpawnCustomer()
     {
-        // 0) 参照チェック
         if (spawnPoint == null)
         {
             Debug.LogError("[CustomerSpawner] spawnPoint が設定されていません。");
@@ -83,7 +84,6 @@ public class CustomerSpawner : MonoBehaviour
             return;
         }
 
-        // 1) 空いている席を探す
         SeatPoint freeSeat = GetFreeSeat();
         if (freeSeat == null)
         {
@@ -91,38 +91,34 @@ public class CustomerSpawner : MonoBehaviour
             return;
         }
 
-        // 2) ✅ 順番に客プレハブを選ぶ（nullがあってもスキップ）
         GameObject prefab = GetNextCustomerPrefabInOrder();
         if (prefab == null)
         {
-            Debug.LogError("[CustomerSpawner] customerPrefabs に有効なPrefabがありません（全部nullの可能性）。");
+            Debug.LogError("[CustomerSpawner] customerPrefabs に有効なPrefabがありません。");
             return;
         }
 
-        // 3) スポーン位置のNavMesh上の正しい位置を探す
         Vector3 finalSpawnPos = spawnPoint.position;
         NavMeshHit hit;
 
+        // スポーン直後に移動できるよう、NavMesh上の有効な位置へ補正する
         if (NavMesh.SamplePosition(spawnPoint.position, out hit, 20.0f, NavMesh.AllAreas))
         {
             finalSpawnPos = hit.position;
         }
         else
         {
-            Debug.LogError($"[CustomerSpawner] スポーン地点 ( {spawnPoint.position} ) の近く(20m以内)にNavMeshが見つかりません！床の上か、青いメッシュの近くに配置してください。");
+            Debug.LogError($"[CustomerSpawner] スポーン地点 ({spawnPoint.position}) の近くにNavMeshが見つかりません。");
             return;
         }
 
-        // 4) 生成
         GameObject obj = Instantiate(prefab, finalSpawnPos, spawnPoint.rotation);
 
-        // 効果音再生
         if (spawnSound != null)
         {
             AudioSource.PlayClipAtPoint(spawnSound, finalSpawnPos);
         }
 
-        // 5) 生成した客を目標の席に向かわせる
         CustomerSitting customer = obj.GetComponent<CustomerSitting>();
         if (customer != null)
         {
@@ -133,7 +129,7 @@ public class CustomerSpawner : MonoBehaviour
 
                 if (!agent.isOnNavMesh)
                 {
-                    Debug.LogError("致命的エラー: 生成した客がNavMeshに乗っていません。NavMeshをBakeしてください！");
+                    Debug.LogError("生成した客がNavMeshに乗っていません。NavMesh設定を確認してください。");
                     Destroy(obj);
                     return;
                 }
@@ -143,13 +139,12 @@ public class CustomerSpawner : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("CustomerSitting スクリプトが客プレハブにアタッチされていません！");
+            Debug.LogWarning("CustomerSitting スクリプトが客プレハブにアタッチされていません。");
         }
     }
 
     /// <summary>
-    /// ✅ 配列の上から順番にPrefabを返す（nullは飛ばす）
-    /// 末尾まで行ったら先頭に戻る（ループ）
+    /// 配列の先頭から順番に有効な客Prefabを取得する。
     /// </summary>
     private GameObject GetNextCustomerPrefabInOrder()
     {
@@ -159,25 +154,20 @@ public class CustomerSpawner : MonoBehaviour
 
         while (checkedCount < customerPrefabs.Length)
         {
-            // 현재 인덱스의 프리팹
             GameObject prefab = customerPrefabs[nextPrefabIndex];
-
-            // 다음번을 위해 인덱스 증가(루프)
             nextPrefabIndex = (nextPrefabIndex + 1) % customerPrefabs.Length;
 
-            // null이 아니면 반환
             if (prefab != null)
                 return prefab;
 
             checkedCount++;
         }
 
-        // 전부 null이면 null
         return null;
     }
 
     /// <summary>
-    /// 配列 seats の中から「未使用の席」を1つ返す。なければ null。
+    /// 未使用の席を1つ取得する。空席がなければ null を返す。
     /// </summary>
     private SeatPoint GetFreeSeat()
     {

@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// 地震発生から避難、解除までの緊急イベント全体の進行を管理するクラス。
+/// センサー入力やキー入力をもとに避難成功を判定する。
+/// </summary>
 public class Test_EmergencyManager : MonoBehaviour
 {
     [SerializeField] private GameObject emergencyMark;
@@ -15,11 +19,9 @@ public class Test_EmergencyManager : MonoBehaviour
 
     void Start()
     {
-        // 開始時は緊急マークを非表示
         if (emergencyMark != null)
             emergencyMark.SetActive(false);
 
-        // 最初の緊急イベントを予約
         ScheduleNextEmergency();
     }
 
@@ -27,19 +29,18 @@ public class Test_EmergencyManager : MonoBehaviour
     {
         if (!isEmergency) return;
 
-        // P キー入力
         bool keyPressed = Input.GetKeyDown(KeyCode.P);
-
-        // 距離センサで机の下に入ったか確認
         bool sensorTriggered = distanceSensorReader != null && distanceSensorReader.UnderDesk;
 
-        // キー入力またはセンサ反応があれば緊急解除
         if (keyPressed || sensorTriggered)
         {
             EndEmergency();
         }
     }
 
+    /// <summary>
+    /// 緊急イベントを開始し、警告表示・移動制限・演出を有効化する。
+    /// </summary>
     void TriggerEmergency()
     {
         isEmergency = true;
@@ -52,6 +53,9 @@ public class Test_EmergencyManager : MonoBehaviour
         Debug.Log("緊急イベント発生！");
     }
 
+    /// <summary>
+    /// 緊急イベントを終了し、演出停止と次回イベント予約を行う。
+    /// </summary>
     void EndEmergency()
     {
         isEmergency = false;
@@ -63,13 +67,14 @@ public class Test_EmergencyManager : MonoBehaviour
 
         Debug.Log("緊急解除完了！");
 
-        // 次の緊急イベントを再予約
         ScheduleNextEmergency();
     }
 
+    /// <summary>
+    /// 指定範囲内のランダムな時間で次の緊急イベントを予約する。
+    /// </summary>
     void ScheduleNextEmergency()
     {
-        // 指定範囲のランダム時間後に緊急イベント発生
         float delay = Random.Range(minTime, maxTime);
         Invoke(nameof(TriggerEmergency), delay);
     }

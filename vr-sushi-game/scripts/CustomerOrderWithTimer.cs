@@ -3,6 +3,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+/// <summary>
+/// 客ごとの注文内容、制限時間、UI表示、正誤判定、スコア反映を管理するクラス。
+/// 注文の生成から結果処理まで一連の流れを担当する。
+/// </summary>
 public class CustomerOrderWithTimer : MonoBehaviour
 {
     [Header("注文設定")]
@@ -21,8 +25,8 @@ public class CustomerOrderWithTimer : MonoBehaviour
     public TMP_Text timerText;
 
     [Header("⏱ タイムゲージ（Slider）")]
-    public Slider timeSlider;                 // ← Sliderに変更
-    public Image timeSliderFill;               // Slider > Fill Area > Fill
+    public Slider timeSlider;
+    public Image timeSliderFill;
     public Color greenColor = Color.green;
     public Color yellowColor = Color.yellow;
     public Color redColor = Color.red;
@@ -91,9 +95,6 @@ public class CustomerOrderWithTimer : MonoBehaviour
         UpdateTimeSlider();
     }
 
-    // =======================
-    // 外部アクセス
-    // =======================
     public bool WantsSushi(string sushiType)
     {
         if (!isOrderActive) return false;
@@ -108,9 +109,9 @@ public class CustomerOrderWithTimer : MonoBehaviour
         else OnReceiveWrongSushi(null);
     }
 
-    // =======================
-    // 新しい注文
-    // =======================
+    /// <summary>
+    /// 新しい注文を生成し、UIとタイマーを初期化する。
+    /// </summary>
     void StartNewOrder()
     {
         int rand = Random.Range(0, possibleSushiTypes.Length);
@@ -120,7 +121,6 @@ public class CustomerOrderWithTimer : MonoBehaviour
         isOrderActive = true;
 
         if (orderCanvas != null) orderCanvas.SetActive(true);
-
         if (orderText != null) orderText.text = currentRequestedSushi;
 
         UpdateOrderImage();
@@ -135,9 +135,6 @@ public class CustomerOrderWithTimer : MonoBehaviour
         PlayOrderSound(currentRequestedSushi);
     }
 
-    // =======================
-    // 注文ボイス
-    // =======================
     void PlayOrderSound(string sushiType)
     {
         AudioClip clip = null;
@@ -152,9 +149,6 @@ public class CustomerOrderWithTimer : MonoBehaviour
             AudioSource.PlayClipAtPoint(clip, transform.position);
     }
 
-    // =======================
-    // 寿司アイコン
-    // =======================
     void UpdateOrderImage()
     {
         if (orderImage == null) return;
@@ -174,9 +168,6 @@ public class CustomerOrderWithTimer : MonoBehaviour
             orderText.enabled = (sprite == null);
     }
 
-    // =======================
-    // 残り時間テキスト
-    // =======================
     void UpdateTimerUI()
     {
         if (timerText == null) return;
@@ -184,9 +175,6 @@ public class CustomerOrderWithTimer : MonoBehaviour
         timerText.text = $"{sec}s";
     }
 
-    // =======================
-    // Slider更新
-    // =======================
     void UpdateTimeSlider()
     {
         if (timeSlider == null) return;
@@ -196,6 +184,9 @@ public class CustomerOrderWithTimer : MonoBehaviour
         UpdateTimeSliderColor(ratio);
     }
 
+    /// <summary>
+    /// 残り時間に応じてゲージ色を変更し、時間切れの危険度を視覚的に伝える。
+    /// </summary>
     void UpdateTimeSliderColor(float ratio)
     {
         if (timeSliderFill == null) return;
@@ -208,9 +199,6 @@ public class CustomerOrderWithTimer : MonoBehaviour
             timeSliderFill.color = greenColor;
     }
 
-    // =======================
-    // 衝突判定
-    // =======================
     private void OnTriggerEnter(Collider other)
     {
         if (!isOrderActive) return;
@@ -224,9 +212,9 @@ public class CustomerOrderWithTimer : MonoBehaviour
             OnReceiveWrongSushi(other.gameObject);
     }
 
-    // =======================
-    // 正解
-    // =======================
+    /// <summary>
+    /// 正しい寿司が提供された際の演出とスコア加算を行う。
+    /// </summary>
     void OnReceiveCorrectSushi(GameObject sushiObj)
     {
         isOrderActive = false;
@@ -244,22 +232,21 @@ public class CustomerOrderWithTimer : MonoBehaviour
         if (animator != null && !string.IsNullOrEmpty(correctTrigger))
             animator.SetTrigger(correctTrigger);
 
-        // スコア加算
         if (ScoreManager.Instance != null)
         {
             ScoreManager.Instance.AddScore(correctScore);
-            ScoreManager.Instance.servedCount++; // 提供成功数
-            
+            ScoreManager.Instance.servedCount++;
+
             float duration = timeLimit - remainingTime;
-            ScoreManager.Instance.totalServiceTime += duration; // かかった時間
+            ScoreManager.Instance.totalServiceTime += duration;
         }
 
         StartCoroutine(StartNextOrderAfterDelay());
     }
 
-    // =======================
-    // 不正解
-    // =======================
+    /// <summary>
+    /// 間違った寿司が提供された際の演出と減点処理を行う。
+    /// </summary>
     void OnReceiveWrongSushi(GameObject sushiObj)
     {
         if (wrongEffect != null)
@@ -274,17 +261,16 @@ public class CustomerOrderWithTimer : MonoBehaviour
         if (animator != null && !string.IsNullOrEmpty(wrongTrigger))
             animator.SetTrigger(wrongTrigger);
 
-        // スコア減点
         if (ScoreManager.Instance != null)
         {
             ScoreManager.Instance.AddScore(-wrongScore);
-            ScoreManager.Instance.wrongCount++; // ミス数
+            ScoreManager.Instance.wrongCount++;
         }
     }
 
-    // =======================
-    // タイムアウト
-    // =======================
+    /// <summary>
+    /// 制限時間切れ時の失敗演出と減点処理を行う。
+    /// </summary>
     void OnTimeout()
     {
         if (!isOrderActive) return;
@@ -307,7 +293,7 @@ public class CustomerOrderWithTimer : MonoBehaviour
         if (ScoreManager.Instance != null)
         {
             ScoreManager.Instance.AddScore(-timeoutScore);
-            ScoreManager.Instance.missedCount++; // 提供失敗数
+            ScoreManager.Instance.missedCount++;
         }
 
         StartCoroutine(StartNextOrderAfterDelay());

@@ -2,6 +2,10 @@ using System;
 using System.IO.Ports;
 using UnityEngine;
 
+/// <summary>
+/// Arduinoから送信された文字列データをシリアル通信で受信し、
+/// センサー反応の有無を判定するクラス。
+/// </summary>
 public class SerialReader : MonoBehaviour
 {
     [SerializeField] private string portName = "COM5";
@@ -15,7 +19,6 @@ public class SerialReader : MonoBehaviour
     {
         try
         {
-            // シリアルポートの初期化
             serialPort = new SerialPort(portName, baudRate);
             serialPort.ReadTimeout = readTimeout;
             serialPort.Open();
@@ -29,17 +32,14 @@ public class SerialReader : MonoBehaviour
 
     void Update()
     {
-        // このフレームでは未検知として初期化
         SensorTriggered = false;
 
         if (serialPort == null || !serialPort.IsOpen) return;
 
         try
         {
-            // Arduino から文字列を受信
             string data = serialPort.ReadLine();
 
-            // TRIGGER を受信したら反応ありと判定
             if (data.Trim() == "TRIGGER")
             {
                 Debug.Log("センサからTRIGGER受信！");
@@ -48,17 +48,14 @@ public class SerialReader : MonoBehaviour
         }
         catch (TimeoutException)
         {
-            // タイムアウトは無視
         }
         catch
         {
-            // 必要ならここでログを出す
         }
     }
 
     void OnDestroy()
     {
-        // 終了時にポートを閉じる
         if (serialPort != null)
         {
             try
@@ -68,7 +65,6 @@ public class SerialReader : MonoBehaviour
             }
             catch
             {
-                // 終了時の例外は無視
             }
         }
     }

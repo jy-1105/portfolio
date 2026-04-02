@@ -3,6 +3,11 @@ using System.IO.Ports;
 using System.Threading;
 using UniRx;
 
+/// <summary>
+/// Arduinoから距離センサーの値をシリアル通信で受信し、
+/// ユーザーが机の下に入ったかどうかを判定するクラス。
+/// 判定結果はキャラクターの状態変化にも反映される。
+/// </summary>
 public class DistanceSensorReader : MonoBehaviour
 {
     [Header("Serial Settings")]
@@ -27,7 +32,6 @@ public class DistanceSensorReader : MonoBehaviour
 
     void Start()
     {
-        // キャラクターが未設定なら処理を止める
         if (character == null)
         {
             Debug.LogError("Character is not assigned.");
@@ -40,11 +44,10 @@ public class DistanceSensorReader : MonoBehaviour
 
         try
         {
-            // シリアルポートを開く
             serial.Open();
             isRunning = true;
 
-            // 別スレッドでシリアル受信を開始
+            // シリアル受信による待機でメインスレッドを止めないよう、別スレッドで読み取る
             Scheduler.ThreadPool.Schedule(ReadData);
         }
         catch (System.Exception e)
@@ -54,16 +57,17 @@ public class DistanceSensorReader : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 別スレッドでシリアルポートから距離データを継続的に受信する。
+    /// </summary>
     void ReadData()
     {
         while (isRunning)
         {
             try
             {
-                // Arduino から 1 行ずつ距離データを受信
                 string line = serial.ReadLine();
 
-                // 数値に変換できた場合のみ更新
                 if (float.TryParse(line, out float parsed))
                 {
                     distance = parsed;
@@ -71,23 +75,23 @@ public class DistanceSensorReader : MonoBehaviour
             }
             catch (TimeoutException)
             {
-                // タイムアウトは無視
             }
             catch
             {
-                // 必要ならここでログを出す
             }
         }
     }
 
+    /// <summary>
+    /// 受信した距離データを基に、机の下に入った状態かどうかを判定する。
+    /// </summary>
     void Update()
     {
         if (distance <= 0f) return;
 
-        // しきい値未満なら机の下に入ったと判定
+        // しきい値より近い場合のみ「机の下に入った」と判定する
         bool newUnderDesk = distance < threshold;
 
-        // 状態が変わらないなら何もしない
         if (newUnderDesk == UnderDesk) return;
 
         UnderDesk = newUnderDesk;
@@ -99,14 +103,12 @@ public class DistanceSensorReader : MonoBehaviour
         }
         else
         {
-            // 通常状態に戻す
             character.transform.localScale = normalScale;
         }
     }
 
     void OnDestroy()
     {
-        // 読み取りループを停止
         isRunning = false;
 
         if (serial != null)
@@ -118,7 +120,6 @@ public class DistanceSensorReader : MonoBehaviour
             }
             catch
             {
-                // 終了時の例外は無視
             }
         }
     }

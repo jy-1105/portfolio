@@ -1,4 +1,4 @@
-# Sim Juyong Portfolio
+# 沈周用 Sim Juyong Portfolio
 
 ## プロフィール
 - 名前：沈周用　Sim Juyong
@@ -24,13 +24,13 @@
 
 ### 1. VR_SushiMaster
 VR空間で寿司を作り、客の注文に応じて投げて提供するゲームです。  
-- 使用技術：Unity / C# / XR Interaction Toolkit / NavMesh
+- 使用技術：Unity / C# / XR Interaction Toolkit
 - 担当：寿司の生成・把持・投擲処理、注文UI、客のスポーン・座席管理・着席処理、スコア判定
 - 詳細：[こちら](./vr-sushi-game/README.md)
 
 ### 2. FLY_PANCAKE
 マウス操作でパワーゲージを調整し、パンケーキをフライパンからフライパンへ飛ばして皿まで運ぶ3Dアクションゲームです。  
-- 使用技術：Unity / C# / Rigidbody / UI（Slider）
+- 使用技術：Unity / C# 
 - 担当：パンケーキの発射処理、パワーゲージ、衝突判定、ゲームオーバー処理、効果音実装
 - 詳細：[こちら](./flypancake-game/README.md)
 

@@ -3,22 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+/// <summary>
+/// 客を指定された席まで移動させ、到着後に着席と注文開始を行うクラス。
+/// 移動状態から着席状態への遷移を管理する。
+/// </summary>
 public class CustomerSitting : MonoBehaviour
 {
     [HideInInspector]
-    public SeatPoint currentSeat;   // 現在座っている席
+    public SeatPoint currentSeat;
 
-    private SeatPoint targetSeat;   // 移動先となる目標の席
+    private SeatPoint targetSeat;
     private NavMeshAgent agent;
     private Animator anim;
 
-    private bool isGoingToSeat = false; // 席へ移動中かどうか
-    private bool isSitting = false;     // すでに座ったかどうか
+    private bool isGoingToSeat = false;
+    private bool isSitting = false;
 
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
-        anim = GetComponentInChildren<Animator>();   // Animator がルートではなく子オブジェクトにある場合に取得
+        anim = GetComponentInChildren<Animator>();
 
         if (anim == null)
         {
@@ -32,19 +36,19 @@ public class CustomerSitting : MonoBehaviour
 
         if (agent != null)
         {
-            agent.updateRotation = true; // 移動方向に合わせて自動回転させる
+            agent.updateRotation = true;
         }
     }
 
     /// <summary>
-    /// 指定された席へ向かって移動を開始する
+    /// 指定された席へ向かって移動を開始する。
     /// </summary>
     public void GoToSeat(SeatPoint seat)
     {
         if (seat == null) return;
 
         targetSeat = seat;
-        targetSeat.isOccupied = true;  // この席を使用中にする
+        targetSeat.isOccupied = true;
 
         isGoingToSeat = true;
         isSitting = false;
@@ -53,22 +57,19 @@ public class CustomerSitting : MonoBehaviour
         {
             agent.enabled = true;
             agent.isStopped = false;
-            agent.SetDestination(targetSeat.transform.position); // 目標の席へ移動開始
+            agent.SetDestination(targetSeat.transform.position);
         }
 
-        // 歩行アニメーションを再生
         if (anim != null)
         {
-            anim.SetBool("IsWalking", true);  // Animator のパラメーター名と一致している必要がある
+            anim.SetBool("IsWalking", true);
         }
     }
 
     void Update()
     {
-        // 席へ移動中で、まだ座っていない場合のみ到着判定を行う
         if (isGoingToSeat && !isSitting && agent != null && agent.enabled)
         {
-            // NavMeshAgent が目的地付近まで到達したか確認
             if (!agent.pathPending &&
                 agent.remainingDistance <= agent.stoppingDistance + 0.05f)
             {
@@ -78,34 +79,30 @@ public class CustomerSitting : MonoBehaviour
     }
 
     /// <summary>
-    /// 席に到着したときの処理
+    /// 席に到着した際に、位置補正・着席アニメーション・注文開始を行う。
     /// </summary>
     private void ArriveAndSit()
     {
         isGoingToSeat = false;
         isSitting = true;
 
-        currentSeat = targetSeat;   // 現在座っている席として保存
+        currentSeat = targetSeat;
 
         if (agent != null)
         {
             agent.isStopped = true;
-            agent.enabled = false;  // 到着後は移動しないため無効化
+            agent.enabled = false;
         }
 
-        // キャラクターの位置と向きを席にぴったり合わせる
         transform.position = currentSeat.transform.position;
-        transform.rotation = currentSeat.transform.rotation;  // 必要なら 180 度回転させる形に変更可能
+        transform.rotation = currentSeat.transform.rotation;
 
         if (anim != null)
         {
-            anim.SetBool("IsWalking", false);  // 歩行アニメーションを停止
-            anim.SetTrigger("Sit");            // 座るアニメーションを再生
-            anim.SetBool("IsWalking", false);  // 歩行アニメーションを停止
-            anim.SetTrigger("Sit");            // 座るアニメーションを再生
+            anim.SetBool("IsWalking", false);
+            anim.SetTrigger("Sit");
         }
 
-        // 着席後に注文処理を開始
         CustomerOrderWithTimer orderScript = GetComponent<CustomerOrderWithTimer>();
         if (orderScript != null)
         {
@@ -114,17 +111,16 @@ public class CustomerSitting : MonoBehaviour
     }
 
     /// <summary>
-    /// 客が退店するときの処理
-    /// 席を空席に戻し、自身を削除する
+    /// 客が退店するときに席を空け、自身を削除する。
     /// </summary>
     public void Leave()
     {
         if (currentSeat != null)
         {
-            currentSeat.isOccupied = false;  // 席を空席状態に戻す
+            currentSeat.isOccupied = false;
             currentSeat = null;
         }
 
-        Destroy(gameObject);  // 客オブジェクトを削除
+        Destroy(gameObject);
     }
 }

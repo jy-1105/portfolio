@@ -2,7 +2,8 @@ using UnityEngine;
 using Valve.VR.InteractionSystem;
 
 /// <summary>
-/// 魚ネタの元 - 掴んだら魚ネタを右手に生成する
+/// プレイヤーが掴む操作を行ったときに、対応する魚ネタを生成して手に持たせるクラス。
+/// VR空間における直感的な食材取得処理を担当する。
 /// </summary>
 [RequireComponent(typeof(Interactable))]
 public class FishSource : MonoBehaviour
@@ -32,11 +33,7 @@ public class FishSource : MonoBehaviour
     void Awake()
     {
         interactable = GetComponent<Interactable>();
-
-        // 掴んだときのイベントに登録
         interactable.onAttachedToHand += OnAttachedToHand;
-
-        // オブジェクト名に魚の種類を追加
         name = $"FishSource ({fishTypeName})";
     }
 
@@ -48,53 +45,45 @@ public class FishSource : MonoBehaviour
         }
     }
 
-    // ---------------------------------------------------------
-    // 変更: Updateで毎フレーム監視する（RiceContainerと同じ方式）
-    // ---------------------------------------------------------
     void Update()
     {
-        // ホバー中の手を取得
         if (interactable != null && interactable.hoveringHand != null)
         {
             Hand hand = interactable.hoveringHand;
-
-            // 掴む操作（Grip or Trigger）が開始されたかチェック
             GrabTypes startingGrabType = hand.GetGrabStarting();
 
             if (startingGrabType != GrabTypes.None)
             {
-                Debug.Log($"[{name}] Grab detected in Update! Type: {startingGrabType}. Spawning Fish...");
-                
-                // 元オブジェクト自体をアタッチするのではなく、直接魚ネタを生成して持たせる
+                Debug.Log($"[{name}] Grab detected in Update! Type: {startingGrabType}");
                 SpawnFish(hand, startingGrabType);
             }
         }
     }
 
+    /// <summary>
+    /// 指定した手の位置に魚ネタを生成し、手にアタッチする。
+    /// </summary>
     private void SpawnFish(Hand hand, GrabTypes grabType)
     {
-        // クールダウンチェック
+        // 連続生成を防ぐため、短時間のクールダウンを設ける
         if (Time.time - lastSpawnTime < cooldownTime)
         {
             Debug.Log("魚ネタ生成のクールダウン中です");
             return;
         }
 
-        // 魚ネタのPrefabが設定されているか確認
         if (fishPrefab == null)
         {
-            Debug.LogError("魚ネタのPrefabが設定されていません！");
+            Debug.LogError("魚ネタのPrefabが設定されていません。");
             return;
         }
 
-        // 魚ネタを生成する位置（手の位置 + オフセット）
         Vector3 spawnPosition = hand.transform.position + hand.transform.TransformDirection(fishSpawnOffset);
         Quaternion spawnRotation = hand.transform.rotation;
 
-        // 魚ネタを生成
         GameObject newFish = Instantiate(fishPrefab, spawnPosition, spawnRotation);
 
-        // 元オブジェクトと魚ネタの衝突を無視する
+        // 生成元との衝突で不自然な挙動が出ないよう、直後の衝突を無効化する
         Collider sourceCollider = GetComponent<Collider>();
         Collider fishCollider = newFish.GetComponent<Collider>();
         if (sourceCollider != null && fishCollider != null)
@@ -104,29 +93,21 @@ public class FishSource : MonoBehaviour
 
         Debug.Log($"{fishTypeName}ネタを{hand.name}に生成しました");
 
-        // 効果音を再生
         if (fishGrabSound != null)
         {
             AudioSource.PlayClipAtPoint(fishGrabSound, spawnPosition);
         }
 
-        // 生成した魚ネタを手にアタッチ
         hand.AttachObject(newFish, grabType);
-
-        // クールダウン時間を記録
         lastSpawnTime = Time.time;
     }
 
-    // OnAttachedToHandはもう使わないが、念のため空にして残しておく
     private void OnAttachedToHand(Hand hand)
     {
-        // 処理なし
     }
 
-    // エディタでの視覚化
     void OnDrawGizmos()
     {
-        // 魚の種類に応じて色を変える
         switch (fishTypeName)
         {
             case "Maguro":
@@ -143,7 +124,6 @@ public class FishSource : MonoBehaviour
                 break;
         }
 
-        // 頭上にアイコン表示
         Gizmos.DrawWireCube(transform.position + Vector3.up * 0.5f, Vector3.one * 0.3f);
     }
 }

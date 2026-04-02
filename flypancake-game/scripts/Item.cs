@@ -1,31 +1,31 @@
 using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// パンケーキに衝突した際にアイテム効果を適用するクラス。
+/// 現在はサイズ変更アイテムに対応している。
+/// </summary>
 public class Item : MonoBehaviour
 {
     public enum ItemType { SizeChange }
     public ItemType itemType;
 
-    public float sizeMultiplierMax = 0.75f;   // サイズ倍率の最大値（大きさを変更するときに使用）
-    public float hideDuration = 3f;  // アイテムを非表示にする時間
+    public float sizeMultiplierMax = 0.75f;
+    public float hideDuration = 3f;
 
     private Renderer itemRenderer;
 
     private void Start()
     {
-        itemRenderer = GetComponent<Renderer>(); // Rendererコンポーネントを取得
+        itemRenderer = GetComponent<Renderer>();
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("pancake")) // パンケーキと衝突したとき
+        if (other.CompareTag("pancake"))
         {
-            Debug.Log("衝突発生: パンケーキとアイテム"); // 衝突確認用のログ
-
-            // アイテム効果を適用
+            Debug.Log("衝突発生: パンケーキとアイテム");
             ApplyItemEffect(other.gameObject);
-
-            // アイテムを非表示にする
             StartCoroutine(HideItem());
         }
     }
@@ -38,41 +38,35 @@ public class Item : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// パンケーキ本体とColliderの両方を変更し、見た目と判定を一致させる。
+    /// </summary>
     private void ChangeSize(GameObject pancake)
     {
         Debug.Log("サイズ変更開始");
 
-        // パンケーキの元の大きさを保存
         Vector3 originalScale = pancake.transform.localScale;
 
-        // パンケーキのColliderの大きさを保存
         BoxCollider pancakeCollider = pancake.GetComponent<BoxCollider>();
         if (pancakeCollider == null)
         {
             Debug.LogWarning("パンケーキオブジェクトにBoxColliderがありません！");
             return;
         }
-        Vector3 originalColliderSize = pancakeCollider.size;
 
-        // サイズ倍率を最大値に設定
+        Vector3 originalColliderSize = pancakeCollider.size;
         float sizeMultiplier = sizeMultiplierMax;
 
-        // 大きさを変更
         pancake.transform.localScale = originalScale * sizeMultiplier;
         pancakeCollider.size = originalColliderSize * sizeMultiplier;
 
-        Debug.Log("サイズ変更: " + pancake.transform.localScale); // サイズ変更確認用のログ
+        Debug.Log("サイズ変更: " + pancake.transform.localScale);
     }
 
     private IEnumerator HideItem()
     {
-        // アイテムを非表示にする
         gameObject.SetActive(false);
-
-        // hideDuration後にアイテムを再表示する
         yield return new WaitForSeconds(hideDuration);
-
-        // アイテムを表示する
         gameObject.SetActive(true);
 
         Debug.Log("アイテムを再度有効化");
