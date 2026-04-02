@@ -50,9 +50,6 @@ VR空間で、来店した客の注文に応じて寿司を作り、投げて提
 - [CustomerOrderWithTimer.cs](./scripts/CustomerOrderWithTimer.cs)  
   注文生成、タイマーUI、正誤判定、スコア反映を担当
 
-- [FishSource.cs](./scripts/FishSource.cs)  
-  VR空間でのネタ生成と手へのアタッチ処理を担当
-
 - [ResultManager.cs](./scripts/ResultManager.cs)  
   スコア集計、ランク表示、リプレイ表示を含むリザルト演出を管理
 
@@ -61,7 +58,7 @@ VR空間で、来店した客の注文に応じて寿司を作り、投げて提
 ![Result画面](./images/result.gif)
 
 ## 動画
-- [プレイ動画](https://www.youtube.com/xxxxx)
+- [プレイ動画](https://youtu.be/Ope7s4MmZjo?si=ShmZJAInu9slHrIx)
 
 ## 補足
 VRならではの直感的な操作感、プレイヤーが状況を即座に理解できるUI設計、繰り返し挑戦したくなるゲーム性に加え、プレイ後に達成感や喜びを感じられるリザルト演出も意識して制作しました。
