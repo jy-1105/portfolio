@@ -15,7 +15,6 @@ VR空間で、来店した客の注文に応じて寿司を作り、投げて提
 - Unity
 - C#
 - XR Interaction Toolkit
-- NavMesh
 
 ## 担当部分
 - VR環境における寿司の生成・把持・投擲処理の実装
